@@ -25,7 +25,7 @@ function LoginForm(){
                 });
 
                 const {accessToken, refreshToken} = response.data.data;
-                console.log(accessToken)
+                // console.log(accessToken)
                 localStorage.setItem('access', accessToken);
 
                 alert('로그인이 완료되었습니다!');

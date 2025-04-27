@@ -1,6 +1,7 @@
 import axios from "axios";
 import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
+import useAuth from "../hooks/useAuth";
 
 interface MyPageData {
     username: string,
@@ -10,12 +11,12 @@ interface MyPageData {
 }
 
 function MyPage(){
-    // 액세스 토큰을 로컬 스토리지에서 가져오기
     const history = useNavigate();
-    const [accessToken, setAccessToken] = useState<string | null>(localStorage.getItem('access'))
+    // const [accessToken, setAccessToken] = useState<string | null>(localStorage.getItem('access'))
+    const {accessToken, isAuthLoading} = useAuth();
     const [loading, setLoading] = useState<boolean>(true); // 로딩 상태 관리
     const [error, setError] = useState<boolean>(false);
-
+    // useAuth()
     const [myPage, setMyPage] = useState<MyPageData>({
         username : '',
         name : '',
@@ -24,12 +25,12 @@ function MyPage(){
     })
     
 
-
     useEffect(() => {
+      if(isAuthLoading) return;
       const checkLogin = async () => {
-
         try {
           if (!accessToken) {
+            console.log("액세스 토큰이 없습니다.!!!!!!!!!!!!!!!!!!@@@@@@@@@@@")
             throw new Error("액세스 토큰이 없습니다.");
           }
           // 1. 액세스 토큰을 사용하여 /my API 호출
@@ -41,34 +42,18 @@ function MyPage(){
           setMyPage(response.data.data)
 
         } catch (error) {
-          try {
-            const response = await axios.post('http://localhost:8080/refresh',{},{
-              withCredentials: true
-            })
-            const newAccessToken = response.data.data.accessToken;
-
-            const retry = await axios.get('http://localhost:8080/my', {
-              headers: {
-                'access': newAccessToken,
-              },
-            });
-            setMyPage(retry.data.data);
-
-
-          } catch (error) {
-            console.error('로그인 상태 확인 중 에러:', error);
-            setError(true);
-          } finally{
-            setLoading(false);
-          }
+          console.error('로그인 상태 확인 중 에러:', error);
+          setError(true);
+        } finally{
+          setLoading(false);
         }
       };
 
       checkLogin();
-    }, []);
+    }, [isAuthLoading]);
     
 
-    if (loading) {
+    if (loading || isAuthLoading) {
         return <div>로딩 중...</div>; // 로딩 중인 경우 표시
     }
 
