@@ -2,6 +2,8 @@ import axios from "axios";
 import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import useAuth from "../hooks/useAuth";
+import { useSelector } from "react-redux";
+import { RootState } from "../store/store";
 
 interface MyPageData {
     username: string,
@@ -12,9 +14,11 @@ interface MyPageData {
 
 function MyPage(){
     const history = useNavigate();
-    // const [accessToken, setAccessToken] = useState<string | null>(localStorage.getItem('access'))
-    const {accessToken, isAuthLoading} = useAuth();
+    // const {accessToken, isAuthLoading} = useAuth();
+    const accessToken = useSelector((state: RootState) => state.auth.accessToken);
+    const isAuthLoading = useSelector((state: RootState) => state.auth.isAuthLoading);
     const [loading, setLoading] = useState<boolean>(true); // 로딩 상태 관리
+    
     const [error, setError] = useState<boolean>(false);
     // useAuth()
     const [myPage, setMyPage] = useState<MyPageData>({
@@ -51,7 +55,6 @@ function MyPage(){
 
       checkLogin();
     }, [isAuthLoading]);
-    
 
     if (loading || isAuthLoading) {
         return <div>로딩 중...</div>; // 로딩 중인 경우 표시
